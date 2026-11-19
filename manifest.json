@@ -1,0 +1,10 @@
+{
+  "name": "STARR 2.0",
+  "short_name": "STARR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080d0b",
+  "theme_color": "#080d0b",
+  "description": "Your money. Your control. Your future."
+}
