@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d0b">
+<title>STARR</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d0b;color:#f5f7f5;font-family:Arial,sans-serif;padding:22px 18px 90px}
+header{display:flex;justify-content:space-between;align-items:center;margin:15px 0 30px}
+.logo{font-size:29px;font-weight:800;letter-spacing:3px}
+.logo span{color:#39d98a}
+.avatar{background:#183c2b;color:#39d98a;padding:12px;border-radius:50%}
+.small{color:#89958e;font-size:13px}
+h2{font-size:23px;margin:8px 0}
+.balance{background:linear-gradient(135deg,#173c2a,#10251c);padding:25px;border-radius:20px;margin-bottom:25px}
+.amount{font-size:35px;font-weight:700;margin:14px 0}
+.stats{display:flex;gap:12px;margin-bottom:27px}
+.stat{flex:1;background:#141b17;padding:17px 12px;border-radius:15px}
+.stat strong{display:block;margin-top:10px;font-size:18px}
+.green{color:#39d98a}
+.red{color:#ff7777}
+.section{display:flex;justify-content:space-between;align-items:center;margin:25px 0 15px}
+button{border:0;cursor:pointer;font-weight:600}
+.add{background:#39d98a;color:#07120b;padding:12px 17px;border-radius:12px}
+.transaction{display:flex;justify-content:space-between;align-items:center;background:#141b17;padding:15px;border-radius:14px;margin-bottom:10px}
+.left{display:flex;gap:12px;align-items:center}
+.symbol{background:#20392b;padding:13px;border-radius:12px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#101713;display:flex;justify-content:space-around;padding:15px 5px}
+nav button{background:none;color:#89958e;font-size:12px}
+nav button.active{color:#39d98a}
+.modal{display:none;position:fixed;inset:0;background:#000c;align-items:center;justify-content:center;padding:20px}
+.modal-content{background:#17221b;padding:24px;border-radius:18px;width:100%;max-width:400px}
+input,select{width:100%;padding:14px;margin:10px 0;background:#0b110d;color:white;border:1px solid #39463d;border-radius:10px}
+.modal-content button{width:100%;margin-top:10px;padding:14px;border-radius:10px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">ST<span>A</span>RR</div>
+<div class="avatar">S</div>
+</header>
+
+<p class="small">WELCOME BACK</p>
+<h2>Your finances, under control.</h2>
+
+<div class="balance">
+<p class="small">TOTAL BALANCE</p>
+<div class="amount" id="balance">R 0.00</div>
+<p class="small">Your financial overview</p>
+</div>
+
+<div class="stats">
+<div class="stat">
+<span class="small">INCOME</span>
+<strong class="green" id="income">R 0.00</strong>
+</div>
+<div class="stat">
+<span class="small">EXPENSES</span>
+<strong class="red" id="expenses">R 0.00</strong>
+</div>
+</div>
+
+<div class="section">
+<h2>Recent activity</h2>
+<button class="add" onclick="openModal()">+ Add</button>
+</div>
+
+<div id="transactions">
+<p class="small">No transactions yet. Add your first transaction.</p>
+</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<h2>New transaction</h2>
+<input id="description" placeholder="Description">
+<input id="amount" type="number" min="0.01" step="0.01" placeholder="Amount (R)">
+<select id="type">
+<option value="income">Income</option>
+<option value="expense">Expense</option>
+</select>
+<button class="add" onclick="saveTransaction()">Save transaction</button>
+<button style="background:#303a33;color:white" onclick="closeModal()">Cancel</button>
+</div>
+</div>
+
+<nav>
+<button class="active">⌂<br>Home</button>
+<button onclick="openModal()">＋<br>Activity</button>
+<button onclick="alert('Budget tools coming next.')">▤<br>Budget</button>
+<button onclick="alert('Reports coming next.')">◷<br>Reports</button>
+</nav>
+
+<script>
+let transactions=JSON.parse(localStorage.getItem('starrTransactions')||'[]');
+
+function money(value){
+return 'R '+value.toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function render(){
+let income=0,expenses=0;
+transactions.forEach(t=>{
+if(t.type==='income')income+=t.amount;
+else expenses+=t.amount;
+});
+document.getElementById('balance').textContent=money(income-expenses);
+document.getElementById('income').textContent=money(income);
+document.getElementById('expenses').textContent=money(expenses);
+
+let list=document.getElementById('transactions');
+if(!transactions.length){
+list.innerHTML='<p class="small">No transactions yet. Add your first transaction.</p>';
+}else{
+list.innerHTML=transactions.slice().reverse().map(t=>`
+<div class="transaction">
+<div class="left">
+<div class="symbol">${t.type==='income'?'↗':'↘'}</div>
+<div><strong>${escapeHTML(t.description)}</strong><div class="small">${t.date}</div></div>
+</div>
+<strong class="${t.type==='income'?'green':'red'}">${t.type==='income'?'+':'-'}${money(t.amount)}</strong>
+</div>`).join('');
+}
+}
+
+function escapeHTML(value){
+return value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openModal(){document.getElementById('modal').style.display='flex'}
+function closeModal(){document.getElementById('modal').style.display='none'}
+
+function saveTransaction(){
+let description=document.getElementById('description').value.trim();
+let amount=Number(document.getElementById('amount').value);
+let type=document.getElementById('type').value;
+
+if(!description||!Number.isFinite(amount)||amount<=0){
+alert('Enter a description and a valid amount.');
+return;
+}
+
+transactions.push({
+description,amount,type,
+date:new Date().toLocaleDateString('en-ZA')
+});
+
+localStorage.setItem('starrTransactions',JSON.stringify(transactions));
+document.getElementById('description').value='';
+document.getElementById('amount').value='';
+closeModal();
+render();
+}
+
+render();
+</script>
+</body>
+</html>
