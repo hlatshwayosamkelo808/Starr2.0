@@ -1,10 +1,24 @@
+
 {
-  "name": "STARR 2.0",
+  "name": "STARR",
   "short_name": "STARR",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#080d0b",
   "theme_color": "#080d0b",
-  "description": "Your money. Your control. Your future."
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
